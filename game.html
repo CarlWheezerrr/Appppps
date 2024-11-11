@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>In-Game Money Transfer & Item Shop</title>
+  <style>
+    /* CSS Variables for Themes */
+    :root {
+      --primary-color: #4CAF50;
+      --secondary-color: #ffffff;
+      --background-color: #f0f0f0;
+      --accent-color: #007BFF;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+      --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Additional Themes */
+    .theme-dark {
+      --primary-color: #2c3e50;
+      --secondary-color: #ecf0f1;
+      --background-color: #34495e;
+      --accent-color: #e67e22;
+      --error-color: #c0392b;
+      --success-color: #27ae60;
+    }
+
+    .theme-blue {
+      --primary-color: #1e90ff;
+      --secondary-color: #f0f8ff;
+      --background-color: #87cefa;
+      --accent-color: #ff6347;
+      --error-color: #dc143c;
+      --success-color: #32cd32;
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      transition: background-color 0.5s ease;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background-color: var(--secondary-color);
+      padding: 30px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    h1, h2 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      transition: color 0.5s ease;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      color: var(--primary-color);
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 2px solid var(--primary-color);
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--accent-color);
+      outline: none;
+    }
+    button {
+      padding: 12px 25px;
+      background-color: var(--primary-color);
+      color: var(--secondary-color);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin: 10px 0;
+    }
+    button:hover {
+      background-color: var(--accent-color);
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .balance {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      color: var(--primary-color);
+      transition: color 0.5s ease;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 16px;
+      text-align: center;
+    }
+    .status.success {
+      color: var(--success-color);
+    }
+    .status.error {
+      color: var(--error-color);
+    }
+    /* Item Shop Styles */
+    .shop {
+      margin-top: 40px;
+    }
+    .shop h2 {
+      margin-bottom: 20px;
+    }
+    .shop-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .shop-item {
+      background-color: var(--background-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 10px;
+      padding: 20px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .shop-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .shop-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 15px;
+    }
+    .shop-item button {
+      width: 100%;
+    }
+    .shop-item.purchased::after {
+      content: "Purchased";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: var(--success-color);
+      color: var(--secondary-color);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .shop-items {
+        flex-direction: column;
+        align-items: center;
+      }
+      .shop-item {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>In-Game Money Transfer</h1>
+
+    <!-- Input to set username -->
+    <label for="username">Username:</label>
+    <input type="text" id="username" placeholder="Enter your username" autocomplete="off">
+
+    <label for="transferAmount">Amount to Transfer:</label>
+    <input type="number" id="transferAmount" placeholder="Enter amount to send" min="1">
+
+    <label for="recipient">Recipient Username:</label>
+    <input type="text" id="recipient" placeholder="Enter recipient's username" autocomplete="off">
+
+    <button onclick="transferMoney()">Send Money</button>
+
+    <div class="balance" id="balanceDisplay">Balance: $100</div>
+    <div class="status" id="statusMessage"></div>
+
+    <!-- Item Shop Section -->
+    <div class="shop">
+      <h2>Item Shop</h2>
+      <div class="shop-items" id="shopItems">
+        <!-- Shop items will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnT2hx4dYFDdLCjlxdNoabBu68b7eSwvI",
+      authDomain: "project-5c6c5.firebaseapp.com",
+      projectId: "project-5c6c5",
+      storageBucket: "project-5c6c5.appspot.com",
+      messagingSenderId: "100440930740",
+      appId: "1:100440930740:web:c82e07f65cabe5e4dc1ae1",
+      measurementId: "G-LE6PGYMLX6",
+      databaseURL: "https://project-5c6c5-default-rtdb.firebaseio.com"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    let currentUser = '';
+
+    const availableItems = [
+      {
+        id: 'theme-dark',
+        name: 'Dark Theme',
+        price: 50,
+        type: 'theme',
+        className: 'theme-dark',
+        img: 'https://via.placeholder.com/100?text=Dark+Theme'
+      },
+      {
+        id: 'theme-blue',
+        name: 'Blue Theme',
+        price: 70,
+        type: 'theme',
+        className: 'theme-blue',
+        img: 'https://via.placeholder.com/100?text=Blue+Theme'
+      },
+      // Add more items as needed
+    ];
+
+    // Function to set username
+    function setUsername() {
+      const username = document.getElementById('username').value.trim();
+      if (!username) {
+        displayStatus('Please enter a valid username.', 'error');
+        return;
+      }
+
+      currentUser = username;
+      const userRef = ref(database, 'users/' + username);
+      
+      // Set user data in Firebase if not already set
+      get(userRef).then(snapshot => {
+        if (!snapshot.exists()) {
+          set(userRef, { balance: 100, items: [] }); // Initial balance and empty items
+        }
+        // Update UI with current balance and items
+        updateBalanceText(username);
+        loadPurchasedItems();
+        loadShopItems();
+      });
+      displayStatus(`Username set to: ${username}`, 'success');
+    }
+
+    // Function to update the balance text from Firebase
+    function updateBalanceText(username) {
+      const userRef = ref(database, 'users/' + username);
+
+      // Real-time listener for balance updates
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById('balanceDisplay').innerText = `Balance: $${data.balance}`;
+          // Apply theme if user has any theme items
+          if (data.items && data.items.length > 0) {
+            // Assuming only one theme can be active at a time
+            const themeItem = availableItems.find(item => data.items.includes(item.id) && item.type === 'theme');
+            if (themeItem) {
+              applyTheme(themeItem.className);
+            } else {
+              removeThemes();
+            }
+          } else {
+            removeThemes();
+          }
+        }
+      });
+    }
+
+    // Function to transfer money
+    window.transferMoney = function() {
+      if (!currentUser) {
+        displayStatus('Please set your username first.', 'error');
+        return;
+      }
+
+      const transferAmount = parseInt(document.getElementById('transferAmount').value.trim());
+      const recipient = document.getElementById('recipient').value.trim();
+
+      // Check if input fields are valid
+      if (!recipient || !transferAmount || transferAmount <= 0) {
+        displayStatus('Please fill in all fields with valid data.', 'error');
+        return;
+      }
+
+      if (recipient === currentUser) {
+        displayStatus('You cannot transfer money to yourself.', 'error');
+        return;
+      }
+
+      // Fetch sender's balance to check if transfer is possible
+      const senderRef = ref(database, 'users/' + currentUser);
+      get(senderRef).then(senderSnapshot => {
+        if (senderSnapshot.exists()) {
+          const senderData = senderSnapshot.val();
+          const senderBalance = senderData.balance;
+          if (senderBalance < transferAmount) {
+            displayStatus('You do not have enough money to complete this transfer.', 'error');
+            return;
+          }
+
+          // Fetch recipient's balance and update it
+          const recipientRef = ref(database, 'users/' + recipient);
+          get(recipientRef).then(recipientSnapshot => {
+            if (recipientSnapshot.exists()) {
+              const recipientData = recipientSnapshot.val();
+              const recipientBalance = recipientData.balance;
+              const newRecipientBalance = recipientBalance + transferAmount;
+
+              // Update recipient's balance in Firebase
+              update(recipientRef, { balance: newRecipientBalance });
+
+              // Deduct from sender's balance and update it
+              const newSenderBalance = senderBalance - transferAmount;
+              update(senderRef, { balance: newSenderBalance });
+
+              // Show success message
+              displayStatus(`Successfully transferred $${transferAmount} to ${recipient}.`, 'success');
+            } else {
+              // If recipient does not exist, create them with the transferred amount
+              set(recipientRef, { balance: transferAmount, items: [] }).then(() => {
+                // Deduct from sender's balance and update it
+                const newSenderBalance = senderBalance - transferAmount;
+                update(senderRef, { balance: newSenderBalance });
+                displayStatus(`Recipient '${recipient}' created and $${transferAmount} transferred.`, 'success');
+              });
+            }
+          });
+        }
+      }).catch(error => {
+        console.error(error);
+        displayStatus('An error occurred during the transfer.', 'error');
+      });
+    }
+
+    // Display status message
+    function displayStatus(message, type) {
+      const statusMessage = document.getElementById('statusMessage');
+      statusMessage.innerText = message;
+      if (type === 'error') {
+        statusMessage.classList.add('error');
+        statusMessage.classList.remove('success');
+      } else {
+        statusMessage.classList.add('success');
+        statusMessage.classList.remove('error');
+      }
+      // Auto-hide message after 5 seconds
+      setTimeout(() => {
+        statusMessage.innerText = '';
+        statusMessage.classList.remove('error', 'success');
+      }, 5000);
+    }
+
+    // Load Shop Items
+    function loadShopItems() {
+      const shopItemsContainer = document.getElementById('shopItems');
+      shopItemsContainer.innerHTML = ''; // Clear existing items
+
+      availableItems.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('shop-item');
+        itemDiv.setAttribute('data-item-id', item.id);
+
+        const img = document.createElement('img');
+        img.src = item.img;
+        img.alt = item.name;
+
+        const name = document.createElement('h3');
+        name.innerText = item.name;
+
+        const price = document.createElement('p');
+        price.innerText = `Price: $${item.price}`;
+
+        const buyButton = document.createElement('button');
+        buyButton.innerText = 'Buy';
+        buyButton.onclick = () => purchaseItem(item.id);
+
+        itemDiv.appendChild(img);
+        itemDiv.appendChild(name);
+        itemDiv.appendChild(price);
+        itemDiv.appendChild(buyButton);
+
+        shopItemsContainer.appendChild(itemDiv);
+      });
+
+      // Update purchase status
+      updateShopItemsUI();
+    }
+
+    // Purchase Item
+    function purchaseItem(itemId) {
+      if (!currentUser) {
+        displayStatus('Please set your username first.', 'error');
+        return;
+      }
+
+      const item = availableItems.find(i => i.id === itemId);
+      if (!item) {
+        displayStatus('Item not found.', 'error');
+        return;
+      }
+
+      const userRef = ref(database, 'users/' + currentUser);
+      get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const balance = userData.balance;
+          const items = userData.items || [];
+
+          if (items.includes(itemId)) {
+            displayStatus('You have already purchased this item.', 'error');
+            return;
+          }
+
+          if (balance < item.price) {
+            displayStatus('Insufficient balance to purchase this item.', 'error');
+            return;
+          }
+
+          // Deduct balance and add item to user's purchased items
+          const newBalance = balance - item.price;
+          const updatedItems = [...items, itemId];
+
+          update(userRef, { balance: newBalance, items: updatedItems }).then(() => {
+            displayStatus(`Successfully purchased ${item.name}.`, 'success');
+            updateShopItemsUI();
+          });
+        }
+      }).catch(error => {
+        console.error(error);
+        displayStatus('An error occurred while purchasing the item.', 'error');
+      });
+    }
+
+    // Update Shop Items UI based on user's purchased items
+    function updateShopItemsUI() {
+      if (!currentUser) return;
+
+      const userRef = ref(database, 'users/' + currentUser);
+      get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const items = userData.items || [];
+
+          availableItems.forEach(item => {
+            const itemDiv = document.querySelector(`.shop-item[data-item-id="${item.id}"]`);
+            if (itemDiv) {
+              const buyButton = itemDiv.querySelector('button');
+              if (items.includes(item.id)) {
+                itemDiv.classList.add('purchased');
+                buyButton.disabled = true;
+                buyButton.innerText = 'Owned';
+              } else {
+                itemDiv.classList.remove('purchased');
+                buyButton.disabled = false;
+                buyButton.innerText = 'Buy';
+              }
+            }
+          });
+        }
+      }).catch(error => {
+        console.error(error);
+      });
+    }
+
+    // Load Purchased Items and Apply Theme if any
+    function loadPurchasedItems() {
+      const userRef = ref(database, 'users/' + currentUser);
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const items = userData.items || [];
+
+          // Apply theme if any
+          const themeItem = availableItems.find(item => items.includes(item.id) && item.type === 'theme');
+          if (themeItem) {
+            applyTheme(themeItem.className);
+          } else {
+            removeThemes();
+          }
+        }
+      });
+    }
+
+    // Apply Theme
+    function applyTheme(themeClass) {
+      document.body.classList.remove('theme-dark', 'theme-blue'); // Remove existing themes
+      document.body.classList.add(themeClass);
+      // Smooth transition for theme change
+      document.documentElement.style.setProperty('--primary-color', getComputedStyle(document.body).getPropertyValue('--primary-color'));
+      document.documentElement.style.setProperty('--secondary-color', getComputedStyle(document.body).getPropertyValue('--secondary-color'));
+      document.documentElement.style.setProperty('--background-color', getComputedStyle(document.body).getPropertyValue('--background-color'));
+      document.documentElement.style.setProperty('--accent-color', getComputedStyle(document.body).getPropertyValue('--accent-color'));
+      document.documentElement.style.setProperty('--error-color', getComputedStyle(document.body).getPropertyValue('--error-color'));
+      document.documentElement.style.setProperty('--success-color', getComputedStyle(document.body).getPropertyValue('--success-color'));
+    }
+
+    // Remove Themes
+    function removeThemes() {
+      document.body.classList.remove('theme-dark', 'theme-blue');
+      // Reset to default theme variables
+      document.documentElement.style.setProperty('--primary-color', '#4CAF50');
+      document.documentElement.style.setProperty('--secondary-color', '#ffffff');
+      document.documentElement.style.setProperty('--background-color', '#f0f0f0');
+      document.documentElement.style.setProperty('--accent-color', '#007BFF');
+      document.documentElement.style.setProperty('--error-color', '#e74c3c');
+      document.documentElement.style.setProperty('--success-color', '#2ecc71');
+    }
+
+    // Initialize Shop on Page Load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadShopItems();
+      // Set username if already filled (optional)
+      // setUsername();
+    });
+
+    // Handle username input blur event
+    document.getElementById('username').addEventListener('blur', setUsername);
+    // Allow pressing Enter to set username
+    document.getElementById('username').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        setUsername();
+      }
+    });
+  </script>
+</body>
+</html>
