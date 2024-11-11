@@ -685,7 +685,7 @@
         if (snapshot.exists()) {
           const userData = snapshot.val();
           const boosters = userData.activeBoosters || {};
-          if (boosters.strength) {
+          if (boosters['booster-strength']) {  // Corrected booster ID
             transferAmount = Math.floor(transferAmount * 1.10); // Increase by 10%
           }
 
@@ -720,21 +720,34 @@
                   const newRecipientBalance = recipientBalance + transferAmount;
 
                   // Update recipient's balance in Firebase
-                  update(recipientRef, { balance: newRecipientBalance });
-
-                  // Deduct from sender's balance and update it
-                  const newSenderBalance = senderBalance - transferAmount;
-                  update(senderRef, { balance: newSenderBalance });
-
-                  // Show success message
-                  displayStatus(`Successfully transferred $${transferAmount} to ${recipient}.`, 'success');
+                  update(recipientRef, { balance: newRecipientBalance }).then(() => {
+                    // Deduct from sender's balance and update it
+                    const newSenderBalance = senderBalance - transferAmount;
+                    update(senderRef, { balance: newSenderBalance }).then(() => {
+                      // Show success message
+                      displayStatus(`Successfully transferred $${transferAmount} to ${recipient}.`, 'success');
+                    }).catch(error => {
+                      console.error(error);
+                      displayStatus('An error occurred while updating your balance.', 'error');
+                    });
+                  }).catch(error => {
+                    console.error(error);
+                    displayStatus('An error occurred while updating recipient\'s balance.', 'error');
+                  });
                 } else {
                   // If recipient does not exist, create them with the transferred amount
                   set(recipientRef, { balance: transferAmount, items: [], equippedItems: {}, activeBoosters: {} }).then(() => {
                     // Deduct from sender's balance and update it
                     const newSenderBalance = senderBalance - transferAmount;
-                    update(senderRef, { balance: newSenderBalance });
-                    displayStatus(`Recipient '${recipient}' created and $${transferAmount} transferred.`, 'success');
+                    update(senderRef, { balance: newSenderBalance }).then(() => {
+                      displayStatus(`Recipient '${recipient}' created and $${transferAmount} transferred.`, 'success');
+                    }).catch(error => {
+                      console.error(error);
+                      displayStatus('An error occurred while updating your balance.', 'error');
+                    });
+                  }).catch(error => {
+                    console.error(error);
+                    displayStatus('An error occurred while creating recipient.', 'error');
                   });
                 }
               });
@@ -853,11 +866,19 @@
             if (item.type === 'avatar') {
               equipItem(item.id);
             }
+
+            // Handle special items immediately after purchase
+            if (item.type === 'special') {
+              handleSpecialItem(item.id);
+            }
+          }).catch(error => {
+            console.error(error);
+            displayStatus('An error occurred while purchasing the item.', 'error');
           });
         }
       }).catch(error => {
         console.error(error);
-        displayStatus('An error occurred while purchasing the item.', 'error');
+        displayStatus('An error occurred while accessing your data.', 'error');
       });
     }
 
@@ -937,6 +958,8 @@
             if (themeItem) {
               applyTheme(themeItem.className);
             }
+          } else {
+            removeThemes();
           }
 
           if (equippedItems.skin) {
@@ -944,6 +967,8 @@
             if (skinItem && skinItem.style) {
               applySkin(skinItem.style);
             }
+          } else {
+            removeSkins();
           }
 
           if (equippedItems.avatar) {
@@ -951,13 +976,15 @@
             if (avatarItem) {
               applyAvatar(avatarItem.img);
             }
+          } else {
+            document.getElementById('userAvatar').src = 'https://via.placeholder.com/60';
           }
 
           // Handle Boosters
           const boosters = availableItems.filter(item => items.includes(item.id) && item.type === 'booster');
           boosters.forEach(booster => {
             if (userData.activeBoosters && userData.activeBoosters[booster.id]) {
-              activateBooster(booster.effect);
+              activateBooster(booster.effect, booster.id); // Pass booster ID for proper tracking
             }
           });
 
@@ -965,9 +992,7 @@
           const specialItems = availableItems.filter(item => items.includes(item.id) && item.type === 'special');
           specialItems.forEach(item => {
             handleSpecialItem(item.id);
-          }
-
-          );
+          });
 
           // Update Equip buttons in the shop
           updateShopItemsUI();
@@ -995,6 +1020,9 @@
             update(userRef, { equippedItems: equippedItems }).then(() => {
               displayStatus(`Equipped ${item.name}.`, 'success');
               updateShopItemsUI();
+            }).catch(error => {
+              console.error(error);
+              displayStatus('An error occurred while equipping the item.', 'error');
             });
           }
         }
@@ -1147,21 +1175,23 @@
     }
 
     // Activate Booster
-    function activateBooster(effect) {
+    function activateBooster(effect, boosterId) {
       switch(effect) {
         case 'speed':
           // Add $5 to balance every 30 seconds
-          const speedInterval = setInterval(() => {
-            const userRef = ref(database, 'users/' + currentUser + '/balance');
-            get(userRef).then(snapshot => {
-              if (snapshot.exists()) {
-                const currentBalance = snapshot.val();
-                const newBalance = currentBalance + 5;
-                update(ref(database, 'users/' + currentUser), { balance: newBalance });
-              }
-            }).catch(error => console.error(error));
-          }, 30000); // 30 seconds
-          boosterIntervals['speed'] = speedInterval;
+          if (!boosterIntervals[boosterId]) { // Prevent multiple intervals
+            const speedInterval = setInterval(() => {
+              const userBalanceRef = ref(database, `users/${currentUser}/balance`);
+              get(userBalanceRef).then(snapshot => {
+                if (snapshot.exists()) {
+                  const currentBalance = snapshot.val();
+                  const newBalance = currentBalance + 5;
+                  update(ref(database, `users/${currentUser}`), { balance: newBalance });
+                }
+              }).catch(error => console.error(error));
+            }, 30000); // 30 seconds
+            boosterIntervals[boosterId] = speedInterval;
+          }
           break;
         case 'strength':
           // Strength Booster affects transfer amounts (handled in transferMoney function)
@@ -1202,9 +1232,6 @@
         displayStatus('An error occurred.', 'error');
       });
     }
-
-    // Equip Item Function Based on Item Type
-    // This is already handled in the equipItem function above
 
     // Initialize Shop on Page Load
     document.addEventListener('DOMContentLoaded', () => {
