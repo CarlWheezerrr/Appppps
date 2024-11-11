@@ -344,16 +344,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-top: 10px; /* Space between buttons */
     }
-    /* Separate positioning for multiple toggle buttons */
+    /* Positioning for multiple toggle buttons */
     .toggle-button.shop {
-      right: 90px; /* Position shop button slightly to the left */
+      bottom: 0px; /* First button at bottom */
+      right: 0px; /* Align to the corner */
     }
     .toggle-button.clicker {
-      right: 160px; /* Position clicker button further to the left */
+      bottom: 0px; /* Second button above the first */
+      right: 160px;
     }
     .toggle-button.leaderboard {
-      right: 230px; /* Position leaderboard button further to the left */
+      bottom: 0px; /* Third button above the second */
+      right: 80px;
     }
     .toggle-button:hover {
       background-color: var(--accent-color);
@@ -509,9 +513,9 @@
   </div>
 
   <!-- Shop, Clicker, and Leaderboard Toggle Buttons -->
-  <button class="toggle-button shop" id="openShop">🛒</button>
-  <button class="toggle-button clicker" id="openClicker">🎮</button>
-  <button class="toggle-button leaderboard" id="openLeaderboard">🏆</button><!-- New Leaderboard Button -->
+  <button class="toggle-button shop" id="openShop" aria-label="Open Shop">🛒</button>
+  <button class="toggle-button clicker" id="openClicker" aria-label="Open Clicker Game">🎮</button>
+  <button class="toggle-button leaderboard" id="openLeaderboard" aria-label="Open Leaderboard">🏆</button>
 
   <!-- Notification Container -->
   <div class="notification-container" id="notificationContainer">
@@ -1064,7 +1068,7 @@ const firebaseConfig = {
           const balance = userData.balance;
           const items = userData.items || [];
 
-          if (items.includes(itemId)) {
+          if (items.includes(item.id)) {
             displayStatus('You have already purchased this item.', 'error');
             return;
           }
@@ -1076,7 +1080,7 @@ const firebaseConfig = {
 
           // Deduct balance and add item to user's purchased items
           const newBalance = balance - item.price;
-          const updatedItems = [...items, itemId];
+          const updatedItems = [...items, item.id];
 
           update(userRef, { balance: newBalance, items: updatedItems }).then(() => {
             displayStatus(`Successfully purchased ${item.name}.`, 'success');
@@ -1540,28 +1544,37 @@ const firebaseConfig = {
 
     // Function to load and display the leaderboard
     function loadLeaderboard() {
-      const leaderboardRef = query(ref(databaseInstance, 'users'), orderByChild('balance'), limitToLast(10));
-      get(leaderboardRef).then(snapshot => {
+      // Reference to the 'users' node in Firebase
+      const usersRef = ref(databaseInstance, 'users');
+
+      // Create a query to order users by 'balance' and limit to the top 10
+      const leaderboardQuery = query(usersRef, orderByChild('balance'), limitToLast(10));
+
+      // Listen for real-time updates using 'onValue'
+      onValue(leaderboardQuery, (snapshot) => {
+        const leaderboardTableBody = document.querySelector('#leaderboardTable tbody');
+        leaderboardTableBody.innerHTML = ''; // Clear existing entries
+
         if (snapshot.exists()) {
           const users = snapshot.val();
           const leaderboard = [];
 
           // Extract users and their balances
           for (const username in users) {
-            leaderboard.push({ username: username, balance: users[username].balance || 0 });
+            const user = users[username];
+            const balance = parseFloat(user.balance);
+
+            // Ensure balance is a valid number
+            if (!isNaN(balance)) {
+              leaderboard.push({ username, balance });
+            }
           }
 
           // Sort users by balance in descending order
           leaderboard.sort((a, b) => b.balance - a.balance);
 
-          // Get top 10 users
-          const topUsers = leaderboard.slice(0, 10);
-
           // Populate the leaderboard table
-          const leaderboardTableBody = document.querySelector('#leaderboardTable tbody');
-          leaderboardTableBody.innerHTML = ''; // Clear existing entries
-
-          topUsers.forEach((user, index) => {
+          leaderboard.forEach((user, index) => {
             const row = document.createElement('tr');
 
             const rankCell = document.createElement('td');
@@ -1584,8 +1597,8 @@ const firebaseConfig = {
           const leaderboardTableBody = document.querySelector('#leaderboardTable tbody');
           leaderboardTableBody.innerHTML = '<tr><td colspan="3">No users found.</td></tr>';
         }
-      }).catch(error => {
-        console.error(error);
+      }, (error) => {
+        console.error('Error loading leaderboard:', error);
         displayStatus('An error occurred while loading the leaderboard.', 'error');
       });
     }
