@@ -14,6 +14,8 @@
       --error-color: #e74c3c;
       --success-color: #2ecc71;
       --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --button-radius: 8px;
+      --button-padding: 12px 25px;
     }
 
     /* Additional Themes */
@@ -35,6 +37,33 @@
       --success-color: #32cd32;
     }
 
+    .theme-purple {
+      --primary-color: #8e44ad;
+      --secondary-color: #fdfefe;
+      --background-color: #9b59b6;
+      --accent-color: #f39c12;
+      --error-color: #c0392b;
+      --success-color: #27ae60;
+    }
+
+    .theme-red {
+      --primary-color: #c0392b;
+      --secondary-color: #ffffff;
+      --background-color: #e74c3c;
+      --accent-color: #3498db;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+    }
+
+    .theme-green {
+      --primary-color: #27ae60;
+      --secondary-color: #ecf0f1;
+      --background-color: #2ecc71;
+      --accent-color: #e67e22;
+      --error-color: #c0392b;
+      --success-color: #16a085;
+    }
+
     /* Base Styles */
     body {
       font-family: var(--font-family);
@@ -44,13 +73,14 @@
       transition: background-color 0.5s ease;
     }
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 40px auto;
       background-color: var(--secondary-color);
       padding: 30px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       animation: fadeIn 1s ease-in-out;
+      position: relative;
     }
     h1, h2 {
       text-align: center;
@@ -63,7 +93,8 @@
       margin: 15px 0 5px;
       color: var(--primary-color);
     }
-    input[type="text"], input[type="number"] {
+    input[type="text"], input[type="number"],
+    select {
       width: 100%;
       padding: 12px 20px;
       margin-bottom: 20px;
@@ -72,16 +103,17 @@
       border-radius: 8px;
       transition: border-color 0.3s ease;
     }
-    input[type="text"]:focus, input[type="number"]:focus {
+    input[type="text"]:focus, input[type="number"]:focus,
+    select:focus {
       border-color: var(--accent-color);
       outline: none;
     }
     button {
-      padding: 12px 25px;
+      padding: var(--button-padding);
       background-color: var(--primary-color);
       color: var(--secondary-color);
       border: none;
-      border-radius: 8px;
+      border-radius: var(--button-radius);
       cursor: pointer;
       font-size: 16px;
       transition: background-color 0.3s ease, transform 0.2s ease;
@@ -117,9 +149,6 @@
     .shop {
       margin-top: 40px;
     }
-    .shop h2 {
-      margin-bottom: 20px;
-    }
     .shop-items {
       display: flex;
       flex-wrap: wrap;
@@ -149,9 +178,10 @@
     }
     .shop-item button {
       width: 100%;
+      margin-top: 10px;
     }
     .shop-item.purchased::after {
-      content: "Purchased";
+      content: "Owned";
       position: absolute;
       top: 10px;
       right: 10px;
@@ -176,12 +206,136 @@
         width: 80%;
       }
     }
+    /* Avatar Display */
+    .avatar-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .avatar-container img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+      border: 2px solid var(--primary-color);
+    }
+    .username-display {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    /* Active Boosters */
+    .boosters {
+      margin-top: 30px;
+    }
+    .booster-item {
+      background-color: var(--background-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .booster-item.active {
+      border-color: var(--success-color);
+      background-color: #dff0d8;
+    }
+    .booster-item button {
+      padding: 8px 15px;
+      font-size: 14px;
+    }
+    /* Badge */
+    .badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background-color: gold;
+      color: #000;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1000; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: var(--secondary-color);
+      margin: auto;
+      padding: 20px;
+      border: 1px solid var(--primary-color);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+      position: relative;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: var(--primary-color);
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .equip-button {
+      margin-top: 10px;
+      background-color: var(--accent-color);
+    }
+    .equip-button.equipped {
+      background-color: var(--success-color);
+      cursor: default;
+    }
+    /* Shop Toggle Button */
+    .shop-toggle-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--primary-color);
+      color: var(--secondary-color);
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 18px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      z-index: 1001;
+    }
+    .shop-toggle-button:hover {
+      background-color: var(--accent-color);
+      transform: translateY(-2px);
+    }
+    .shop-toggle-button:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>In-Game Money Transfer</h1>
+    <div class="avatar-container">
+      <img src="https://via.placeholder.com/60" alt="Avatar" id="userAvatar">
+      <div class="username-display" id="usernameDisplay">Guest</div>
+    </div>
 
     <!-- Input to set username -->
     <label for="username">Username:</label>
@@ -198,8 +352,20 @@
     <div class="balance" id="balanceDisplay">Balance: $100</div>
     <div class="status" id="statusMessage"></div>
 
-    <!-- Item Shop Section -->
-    <div class="shop">
+    <!-- Active Boosters Section -->
+    <div class="boosters">
+      <h2>Active Boosters</h2>
+      <div id="activeBoosters">
+        <!-- Active boosters will be displayed here -->
+        <p>No active boosters.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop Modal -->
+  <div id="shopModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeShop">&times;</span>
       <h2>Item Shop</h2>
       <div class="shop-items" id="shopItems">
         <!-- Shop items will be dynamically inserted here -->
@@ -207,10 +373,13 @@
     </div>
   </div>
 
+  <!-- Shop Toggle Button -->
+  <button class="shop-toggle-button" id="openShop">🛒</button>
+
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getDatabase, ref, set, get, update, onValue, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -229,15 +398,17 @@
     const database = getDatabase(app);
 
     let currentUser = '';
+    let boosterIntervals = {};
 
     const availableItems = [
+      // Themes
       {
         id: 'theme-dark',
         name: 'Dark Theme',
         price: 50,
         type: 'theme',
         className: 'theme-dark',
-        img: 'https://via.placeholder.com/100?text=Dark+Theme'
+        img: 'https://via.placeholder.com/100/2c3e50/ffffff?text=Dark+Theme'
       },
       {
         id: 'theme-blue',
@@ -245,9 +416,177 @@
         price: 70,
         type: 'theme',
         className: 'theme-blue',
-        img: 'https://via.placeholder.com/100?text=Blue+Theme'
+        img: 'https://via.placeholder.com/100/1e90ff/ffffff?text=Blue+Theme'
       },
-      // Add more items as needed
+      {
+        id: 'theme-purple',
+        name: 'Purple Theme',
+        price: 90,
+        type: 'theme',
+        className: 'theme-purple',
+        img: 'https://via.placeholder.com/100/8e44ad/ffffff?text=Purple+Theme'
+      },
+      {
+        id: 'theme-red',
+        name: 'Red Theme',
+        price: 60,
+        type: 'theme',
+        className: 'theme-red',
+        img: 'https://via.placeholder.com/100/c0392b/ffffff?text=Red+Theme'
+      },
+      {
+        id: 'theme-green',
+        name: 'Green Theme',
+        price: 80,
+        type: 'theme',
+        className: 'theme-green',
+        img: 'https://via.placeholder.com/100/27ae60/ffffff?text=Green+Theme'
+      },
+      // Avatars
+      {
+        id: 'avatar-warrior',
+        name: 'Warrior Avatar',
+        price: 40,
+        type: 'avatar',
+        img: 'https://i.pinimg.com/736x/07/88/6d/07886d529d78237dc1d7c73c12f033a4.jpg'
+      },
+      {
+        id: 'avatar-mage',
+        name: 'Mage Avatar',
+        price: 45,
+        type: 'avatar',
+        img: 'https://i.pinimg.com/280x280_RS/61/3c/30/613c30e2dac0314cef36b2ffd2474ba5.jpg'
+      },
+      {
+        id: 'avatar-archer',
+        name: 'Archer Avatar',
+        price: 35,
+        type: 'avatar',
+        img: 'https://i.pinimg.com/736x/66/d7/eb/66d7eb89b77d5b4df49375df25e53e66.jpg'
+      },
+      {
+        id: 'avatar-assassin',
+        name: 'Assassin Avatar',
+        price: 50,
+        type: 'avatar',
+        img: 'https://t4.ftcdn.net/jpg/05/64/57/07/360_F_564570700_QhuVCAjNfAW1IP4HAGE91D9uwM2vwU2X.jpg'
+      },
+      {
+        id: 'avatar-paladin',
+        name: 'Paladin Avatar',
+        price: 55,
+        type: 'avatar',
+        img: 'https://img.freepik.com/premium-photo/paladin-fantasy-game-medieval-armor-shield-photography-image-ai-generated-art_853163-1760.jpg'
+      },
+      // Skins
+      {
+        id: 'skin-sword',
+        name: 'Excalibur Sword',
+        price: 25,
+        type: 'skin',
+        target: 'buttons',
+        style: {
+          backgroundColor: '#f39c12',
+          borderColor: '#e67e22',
+          color: '#ffffff'
+        },
+        img: 'https://wallpapers.com/images/hd/sword-gaming-profile-qdsskuz09uw3b37w.jpg'
+      },
+      {
+        id: 'skin-shield',
+        name: 'Aegis Shield',
+        price: 30,
+        type: 'skin',
+        target: 'buttons',
+        style: {
+          backgroundColor: '#1abc9c',
+          borderColor: '#16a085',
+          color: '#ffffff'
+        },
+        img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDFfLYelSZrvnGk2DMsWdTUiUqtEkkiKfeFQ&s'
+      },
+      {
+        id: 'skin-bow',
+        name: 'Longbow',
+        price: 20,
+        type: 'skin',
+        target: 'buttons',
+        style: {
+          backgroundColor: '#3498db',
+          borderColor: '#2980b9',
+          color: '#ffffff'
+        },
+        img: 'https://media.istockphoto.com/id/1323676411/vector/golden-archer-silhouette-on-black-background.jpg?s=612x612&w=0&k=20&c=LjQwb025gF9Yb_oiIMR8JHxx1Z5TXYgswmvfnbgMb1g='
+      },
+      {
+        id: 'skin-armor',
+        name: 'Dragon Armor',
+        price: 40,
+        type: 'skin',
+        target: 'buttons',
+        style: {
+          backgroundColor: '#9b59b6',
+          borderColor: '#8e44ad',
+          color: '#ffffff'
+        },
+        img: 'https://img.pikbest.com/wp/202345/armored-knight-with-his-armor-burning-in-the-face_9600849.jpg!w700wp'
+      },
+      // Boosters
+      {
+        id: 'booster-speed',
+        name: 'Speed Booster',
+        price: 15,
+        type: 'booster',
+        effect: 'speed',
+        img: 'https://cdn2.iconfinder.com/data/icons/valuablevehicles-and-car-parts/200/powerup_speed_fast_turbo_jump-512.png'
+      },
+      {
+        id: 'booster-strength',
+        name: 'Strength Booster',
+        price: 20,
+        type: 'booster',
+        effect: 'strength',
+        img: 'https://media.istockphoto.com/id/1183169839/vector/lightning-isolated-vector-icon-electric-bolt-flash-icon-power-energy-symbol-thunder-icon.jpg?s=612x612&w=0&k=20&c=kFdwoQHmrv8EzCofbdzL7EVW8vtgiHvhrGkOl0_N0io='
+      },
+      {
+        id: 'booster-defense',
+        name: 'Defense Booster',
+        price: 18,
+        type: 'booster',
+        effect: 'defense',
+        img: 'https://via.placeholder.com/100/27ae60/ffffff?text=Defense+Booster'
+      },
+      {
+        id: 'booster-agility',
+        name: 'Agility Booster',
+        price: 22,
+        type: 'booster',
+        effect: 'agility',
+        img: 'https://via.placeholder.com/100/f39c12/ffffff?text=Agility+Booster'
+      },
+      {
+        id: 'booster-intelligence',
+        name: 'Intelligence Booster',
+        price: 25,
+        type: 'booster',
+        effect: 'intelligence',
+        img: 'https://via.placeholder.com/100/8e44ad/ffffff?text=Intelligence+Booster'
+      },
+      // Special Items
+      {
+        id: 'special-gem',
+        name: 'Mystic Gem',
+        price: 100,
+        type: 'special',
+        img: 'https://via.placeholder.com/100/9b59b6/ffffff?text=Mystic+Gem'
+      },
+      {
+        id: 'special-token',
+        name: 'Golden Token',
+        price: 120,
+        type: 'special',
+        img: 'https://via.placeholder.com/100/f1c40f/ffffff?text=Golden+Token'
+      }
     ];
 
     // Function to set username
@@ -264,7 +603,7 @@
       // Set user data in Firebase if not already set
       get(userRef).then(snapshot => {
         if (!snapshot.exists()) {
-          set(userRef, { balance: 100, items: [] }); // Initial balance and empty items
+          set(userRef, { balance: 100, items: [], equippedItems: {}, activeBoosters: {} }); // Initial balance, empty items, no active boosters
         }
         // Update UI with current balance and items
         updateBalanceText(username);
@@ -278,23 +617,53 @@
     function updateBalanceText(username) {
       const userRef = ref(database, 'users/' + username);
 
-      // Real-time listener for balance updates
+      // Real-time listener for balance, items, and equippedItems updates
       onValue(userRef, (snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           document.getElementById('balanceDisplay').innerText = `Balance: $${data.balance}`;
+          // Update avatar
+          if (data.avatar) {
+            document.getElementById('userAvatar').src = data.avatar;
+          } else {
+            document.getElementById('userAvatar').src = 'https://via.placeholder.com/60';
+          }
+
+          // Update username display
+          document.getElementById('usernameDisplay').innerText = currentUser;
+
           // Apply theme if user has any theme items
-          if (data.items && data.items.length > 0) {
-            // Assuming only one theme can be active at a time
-            const themeItem = availableItems.find(item => data.items.includes(item.id) && item.type === 'theme');
+          if (data.equippedItems && data.equippedItems.theme) {
+            const themeItem = availableItems.find(item => item.id === data.equippedItems.theme && item.type === 'theme');
             if (themeItem) {
               applyTheme(themeItem.className);
-            } else {
-              removeThemes();
             }
           } else {
             removeThemes();
           }
+
+          // Apply Skin if any
+          if (data.equippedItems && data.equippedItems.skin) {
+            const skinItem = availableItems.find(item => item.id === data.equippedItems.skin && item.type === 'skin');
+            if (skinItem && skinItem.style) {
+              applySkin(skinItem.style);
+            }
+          } else {
+            removeSkins();
+          }
+
+          // Apply Avatar if any
+          if (data.equippedItems && data.equippedItems.avatar) {
+            const avatarItem = availableItems.find(item => item.id === data.equippedItems.avatar && item.type === 'avatar');
+            if (avatarItem) {
+              applyAvatar(avatarItem.img);
+            }
+          } else {
+            document.getElementById('userAvatar').src = 'https://via.placeholder.com/60';
+          }
+
+          // Load Active Boosters
+          loadActiveBoosters(data.activeBoosters);
         }
       });
     }
@@ -306,62 +675,78 @@
         return;
       }
 
-      const transferAmount = parseInt(document.getElementById('transferAmount').value.trim());
+      const transferAmountInput = document.getElementById('transferAmount').value.trim();
+      let transferAmount = parseInt(transferAmountInput);
       const recipient = document.getElementById('recipient').value.trim();
 
-      // Check if input fields are valid
-      if (!recipient || !transferAmount || transferAmount <= 0) {
-        displayStatus('Please fill in all fields with valid data.', 'error');
-        return;
-      }
+      // Apply Strength Booster if active
+      const userRef = ref(database, 'users/' + currentUser);
+      get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const boosters = userData.activeBoosters || {};
+          if (boosters.strength) {
+            transferAmount = Math.floor(transferAmount * 1.10); // Increase by 10%
+          }
 
-      if (recipient === currentUser) {
-        displayStatus('You cannot transfer money to yourself.', 'error');
-        return;
-      }
-
-      // Fetch sender's balance to check if transfer is possible
-      const senderRef = ref(database, 'users/' + currentUser);
-      get(senderRef).then(senderSnapshot => {
-        if (senderSnapshot.exists()) {
-          const senderData = senderSnapshot.val();
-          const senderBalance = senderData.balance;
-          if (senderBalance < transferAmount) {
-            displayStatus('You do not have enough money to complete this transfer.', 'error');
+          // Check if input fields are valid
+          if (!recipient || !transferAmount || transferAmount <= 0) {
+            displayStatus('Please fill in all fields with valid data.', 'error');
             return;
           }
 
-          // Fetch recipient's balance and update it
-          const recipientRef = ref(database, 'users/' + recipient);
-          get(recipientRef).then(recipientSnapshot => {
-            if (recipientSnapshot.exists()) {
-              const recipientData = recipientSnapshot.val();
-              const recipientBalance = recipientData.balance;
-              const newRecipientBalance = recipientBalance + transferAmount;
+          if (recipient === currentUser) {
+            displayStatus('You cannot transfer money to yourself.', 'error');
+            return;
+          }
 
-              // Update recipient's balance in Firebase
-              update(recipientRef, { balance: newRecipientBalance });
+          // Fetch sender's balance to check if transfer is possible
+          const senderRef = ref(database, 'users/' + currentUser);
+          get(senderRef).then(senderSnapshot => {
+            if (senderSnapshot.exists()) {
+              const senderData = senderSnapshot.val();
+              const senderBalance = senderData.balance;
+              if (senderBalance < transferAmount) {
+                displayStatus('You do not have enough money to complete this transfer.', 'error');
+                return;
+              }
 
-              // Deduct from sender's balance and update it
-              const newSenderBalance = senderBalance - transferAmount;
-              update(senderRef, { balance: newSenderBalance });
+              // Fetch recipient's balance and update it
+              const recipientRef = ref(database, 'users/' + recipient);
+              get(recipientRef).then(recipientSnapshot => {
+                if (recipientSnapshot.exists()) {
+                  const recipientData = recipientSnapshot.val();
+                  const recipientBalance = recipientData.balance;
+                  const newRecipientBalance = recipientBalance + transferAmount;
 
-              // Show success message
-              displayStatus(`Successfully transferred $${transferAmount} to ${recipient}.`, 'success');
-            } else {
-              // If recipient does not exist, create them with the transferred amount
-              set(recipientRef, { balance: transferAmount, items: [] }).then(() => {
-                // Deduct from sender's balance and update it
-                const newSenderBalance = senderBalance - transferAmount;
-                update(senderRef, { balance: newSenderBalance });
-                displayStatus(`Recipient '${recipient}' created and $${transferAmount} transferred.`, 'success');
+                  // Update recipient's balance in Firebase
+                  update(recipientRef, { balance: newRecipientBalance });
+
+                  // Deduct from sender's balance and update it
+                  const newSenderBalance = senderBalance - transferAmount;
+                  update(senderRef, { balance: newSenderBalance });
+
+                  // Show success message
+                  displayStatus(`Successfully transferred $${transferAmount} to ${recipient}.`, 'success');
+                } else {
+                  // If recipient does not exist, create them with the transferred amount
+                  set(recipientRef, { balance: transferAmount, items: [], equippedItems: {}, activeBoosters: {} }).then(() => {
+                    // Deduct from sender's balance and update it
+                    const newSenderBalance = senderBalance - transferAmount;
+                    update(senderRef, { balance: newSenderBalance });
+                    displayStatus(`Recipient '${recipient}' created and $${transferAmount} transferred.`, 'success');
+                  });
+                }
               });
             }
+          }).catch(error => {
+            console.error(error);
+            displayStatus('An error occurred during the transfer.', 'error');
           });
         }
       }).catch(error => {
         console.error(error);
-        displayStatus('An error occurred during the transfer.', 'error');
+        displayStatus('An error occurred.', 'error');
       });
     }
 
@@ -412,6 +797,14 @@
         itemDiv.appendChild(price);
         itemDiv.appendChild(buyButton);
 
+        // Add badge for special items
+        if (item.type === 'special') {
+          const badge = document.createElement('div');
+          badge.classList.add('badge');
+          badge.innerText = 'VIP';
+          itemDiv.appendChild(badge);
+        }
+
         shopItemsContainer.appendChild(itemDiv);
       });
 
@@ -456,6 +849,10 @@
           update(userRef, { balance: newBalance, items: updatedItems }).then(() => {
             displayStatus(`Successfully purchased ${item.name}.`, 'success');
             updateShopItemsUI();
+            // If it's an avatar, automatically equip it
+            if (item.type === 'avatar') {
+              equipItem(item.id);
+            }
           });
         }
       }).catch(error => {
@@ -473,6 +870,7 @@
         if (snapshot.exists()) {
           const userData = snapshot.val();
           const items = userData.items || [];
+          const equippedItems = userData.equippedItems || {};
 
           availableItems.forEach(item => {
             const itemDiv = document.querySelector(`.shop-item[data-item-id="${item.id}"]`);
@@ -482,10 +880,39 @@
                 itemDiv.classList.add('purchased');
                 buyButton.disabled = true;
                 buyButton.innerText = 'Owned';
+
+                // Add Equip button if the item is equippable
+                if (['theme', 'avatar', 'skin'].includes(item.type)) {
+                  let equipButton = itemDiv.querySelector('.equip-button');
+                  if (!equipButton) {
+                    equipButton = document.createElement('button');
+                    equipButton.innerText = 'Equip';
+                    equipButton.classList.add('equip-button');
+                    equipButton.onclick = () => equipItem(item.id);
+                    itemDiv.appendChild(equipButton);
+                  }
+
+                  // Update Equip button state
+                  if (equippedItems[item.type] === item.id) {
+                    equipButton.classList.add('equipped');
+                    equipButton.innerText = 'Equipped';
+                    equipButton.disabled = true;
+                  } else {
+                    equipButton.classList.remove('equipped');
+                    equipButton.innerText = 'Equip';
+                    equipButton.disabled = false;
+                  }
+                }
               } else {
                 itemDiv.classList.remove('purchased');
                 buyButton.disabled = false;
                 buyButton.innerText = 'Buy';
+
+                // Remove Equip button if exists
+                const equipButton = itemDiv.querySelector('.equip-button');
+                if (equipButton) {
+                  equipButton.remove();
+                }
               }
             }
           });
@@ -495,28 +922,91 @@
       });
     }
 
-    // Load Purchased Items and Apply Theme if any
+    // Load Purchased Items and Apply Features if any
     function loadPurchasedItems() {
       const userRef = ref(database, 'users/' + currentUser);
       onValue(userRef, (snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
           const items = userData.items || [];
+          const equippedItems = userData.equippedItems || {};
 
-          // Apply theme if any
-          const themeItem = availableItems.find(item => items.includes(item.id) && item.type === 'theme');
-          if (themeItem) {
-            applyTheme(themeItem.className);
-          } else {
-            removeThemes();
+          // Equip items based on equippedItems
+          if (equippedItems.theme) {
+            const themeItem = availableItems.find(item => item.id === equippedItems.theme && item.type === 'theme');
+            if (themeItem) {
+              applyTheme(themeItem.className);
+            }
+          }
+
+          if (equippedItems.skin) {
+            const skinItem = availableItems.find(item => item.id === equippedItems.skin && item.type === 'skin');
+            if (skinItem && skinItem.style) {
+              applySkin(skinItem.style);
+            }
+          }
+
+          if (equippedItems.avatar) {
+            const avatarItem = availableItems.find(item => item.id === equippedItems.avatar && item.type === 'avatar');
+            if (avatarItem) {
+              applyAvatar(avatarItem.img);
+            }
+          }
+
+          // Handle Boosters
+          const boosters = availableItems.filter(item => items.includes(item.id) && item.type === 'booster');
+          boosters.forEach(booster => {
+            if (userData.activeBoosters && userData.activeBoosters[booster.id]) {
+              activateBooster(booster.effect);
+            }
+          });
+
+          // Handle Special Items
+          const specialItems = availableItems.filter(item => items.includes(item.id) && item.type === 'special');
+          specialItems.forEach(item => {
+            handleSpecialItem(item.id);
+          }
+
+          );
+
+          // Update Equip buttons in the shop
+          updateShopItemsUI();
+        }
+      });
+    }
+
+    // Equip Item
+    function equipItem(itemId) {
+      const item = availableItems.find(i => i.id === itemId);
+      if (!item) {
+        displayStatus('Item not found.', 'error');
+        return;
+      }
+
+      const userRef = ref(database, 'users/' + currentUser);
+      get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const equippedItems = userData.equippedItems || {};
+
+          // If equipping a theme, skin, or avatar, unequip the previous one of the same type
+          if (item.type === 'theme' || item.type === 'skin' || item.type === 'avatar') {
+            equippedItems[item.type] = item.id;
+            update(userRef, { equippedItems: equippedItems }).then(() => {
+              displayStatus(`Equipped ${item.name}.`, 'success');
+              updateShopItemsUI();
+            });
           }
         }
+      }).catch(error => {
+        console.error(error);
+        displayStatus('An error occurred while equipping the item.', 'error');
       });
     }
 
     // Apply Theme
     function applyTheme(themeClass) {
-      document.body.classList.remove('theme-dark', 'theme-blue'); // Remove existing themes
+      document.body.classList.remove('theme-dark', 'theme-blue', 'theme-purple', 'theme-red', 'theme-green', 'theme-exclusive'); // Remove existing themes
       document.body.classList.add(themeClass);
       // Smooth transition for theme change
       document.documentElement.style.setProperty('--primary-color', getComputedStyle(document.body).getPropertyValue('--primary-color'));
@@ -529,7 +1019,7 @@
 
     // Remove Themes
     function removeThemes() {
-      document.body.classList.remove('theme-dark', 'theme-blue');
+      document.body.classList.remove('theme-dark', 'theme-blue', 'theme-purple', 'theme-red', 'theme-green', 'theme-exclusive');
       // Reset to default theme variables
       document.documentElement.style.setProperty('--primary-color', '#4CAF50');
       document.documentElement.style.setProperty('--secondary-color', '#ffffff');
@@ -538,6 +1028,183 @@
       document.documentElement.style.setProperty('--error-color', '#e74c3c');
       document.documentElement.style.setProperty('--success-color', '#2ecc71');
     }
+
+    // Apply Skin
+    function applySkin(style) {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.style.backgroundColor = style.backgroundColor;
+        btn.style.borderColor = style.borderColor;
+        btn.style.color = style.color;
+      });
+    }
+
+    // Remove Skins
+    function removeSkins() {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.style.backgroundColor = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      });
+    }
+
+    // Apply Avatar
+    function applyAvatar(imgUrl) {
+      document.getElementById('userAvatar').src = imgUrl;
+    }
+
+    // Handle Special Items
+    function handleSpecialItem(itemId) {
+      if (itemId === 'special-gem') {
+        // Unlock a unique badge or effect
+        const container = document.querySelector('.container');
+        if (!document.querySelector('.badge-special')) {
+          const badge = document.createElement('div');
+          badge.classList.add('badge', 'badge-special');
+          badge.style.position = 'absolute';
+          badge.style.top = '10px';
+          badge.style.left = '10px';
+          badge.style.backgroundColor = '#ffd700';
+          badge.style.color = '#000';
+          badge.style.padding = '5px 10px';
+          badge.style.borderRadius = '5px';
+          badge.style.fontSize = '12px';
+          badge.style.fontWeight = 'bold';
+          badge.innerText = 'Gem Holder';
+          container.appendChild(badge);
+        }
+      }
+
+      if (itemId === 'special-token') {
+        // Unlock exclusive Theme or feature
+        // For demonstration, let's add a new exclusive theme
+        const exclusiveTheme = {
+          id: 'theme-exclusive',
+          name: 'Exclusive Theme',
+          price: 0,
+          type: 'theme',
+          className: 'theme-exclusive',
+          img: 'https://via.placeholder.com/100/ff69b4/ffffff?text=Exclusive+Theme'
+        };
+
+        // Define exclusive theme styles
+        const style = document.createElement('style');
+        style.innerHTML = `
+          .theme-exclusive {
+            --primary-color: #ff69b4;
+            --secondary-color: #ffe4e1;
+            --background-color: #ffb6c1;
+            --accent-color: #8a2be2;
+            --error-color: #ff1493;
+            --success-color: #32cd32;
+          }
+        `;
+        document.head.appendChild(style);
+
+        // Add the exclusive theme to availableItems if not already present
+        if (!availableItems.find(i => i.id === 'theme-exclusive')) {
+          availableItems.push(exclusiveTheme);
+          loadShopItems(); // Reload shop to include the new theme
+        }
+
+        // Automatically equip the exclusive theme
+        equipItem(exclusiveTheme.id);
+      }
+    }
+
+    // Load Active Boosters
+    function loadActiveBoosters(activeBoosters = {}) {
+      const activeBoostersContainer = document.getElementById('activeBoosters');
+      activeBoostersContainer.innerHTML = ''; // Clear existing boosters
+
+      const boosterKeys = Object.keys(activeBoosters);
+      if (boosterKeys.length === 0) {
+        activeBoostersContainer.innerHTML = '<p>No active boosters.</p>';
+        return;
+      }
+
+      boosterKeys.forEach(boosterId => {
+        const booster = availableItems.find(item => item.id === boosterId && item.type === 'booster');
+        if (booster) {
+          const boosterDiv = document.createElement('div');
+          boosterDiv.classList.add('booster-item', 'active');
+          boosterDiv.setAttribute('data-booster-id', booster.id);
+
+          const boosterName = document.createElement('span');
+          boosterName.innerText = booster.name;
+
+          const deactivateButton = document.createElement('button');
+          deactivateButton.innerText = 'Deactivate';
+          deactivateButton.onclick = () => deactivateBooster(booster.id);
+
+          boosterDiv.appendChild(boosterName);
+          boosterDiv.appendChild(deactivateButton);
+
+          activeBoostersContainer.appendChild(boosterDiv);
+        }
+      });
+    }
+
+    // Activate Booster
+    function activateBooster(effect) {
+      switch(effect) {
+        case 'speed':
+          // Add $5 to balance every 30 seconds
+          const speedInterval = setInterval(() => {
+            const userRef = ref(database, 'users/' + currentUser + '/balance');
+            get(userRef).then(snapshot => {
+              if (snapshot.exists()) {
+                const currentBalance = snapshot.val();
+                const newBalance = currentBalance + 5;
+                update(ref(database, 'users/' + currentUser), { balance: newBalance });
+              }
+            }).catch(error => console.error(error));
+          }, 30000); // 30 seconds
+          boosterIntervals['speed'] = speedInterval;
+          break;
+        case 'strength':
+          // Strength Booster affects transfer amounts (handled in transferMoney function)
+          // No additional setup needed
+          break;
+        // Implement other booster effects as needed
+        default:
+          console.log(`Booster effect "${effect}" not implemented.`);
+      }
+    }
+
+    // Deactivate Booster
+    function deactivateBooster(boosterId) {
+      const userRef = ref(database, 'users/' + currentUser);
+      get(userRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const activeBoosters = userData.activeBoosters || {};
+          if (activeBoosters[boosterId]) {
+            // Remove booster from activeBoosters
+            delete activeBoosters[boosterId];
+            update(userRef, { activeBoosters: activeBoosters }).then(() => {
+              // Clear the interval if it's a booster with ongoing effects
+              if (boosterIntervals[boosterId]) {
+                clearInterval(boosterIntervals[boosterId]);
+                delete boosterIntervals[boosterId];
+              }
+              displayStatus(`Booster '${boosterId}' deactivated.`, 'success');
+              loadActiveBoosters(activeBoosters);
+            }).catch(error => {
+              console.error(error);
+              displayStatus('An error occurred while deactivating the booster.', 'error');
+            });
+          }
+        }
+      }).catch(error => {
+        console.error(error);
+        displayStatus('An error occurred.', 'error');
+      });
+    }
+
+    // Equip Item Function Based on Item Type
+    // This is already handled in the equipItem function above
 
     // Initialize Shop on Page Load
     document.addEventListener('DOMContentLoaded', () => {
@@ -554,6 +1221,28 @@
         setUsername();
       }
     });
+
+    // Modal Functionality
+    const shopModal = document.getElementById('shopModal');
+    const openShopButton = document.getElementById('openShop');
+    const closeShopButton = document.getElementById('closeShop');
+
+    // Open Shop Modal
+    openShopButton.onclick = () => {
+      shopModal.style.display = 'flex';
+    }
+
+    // Close Shop Modal
+    closeShopButton.onclick = () => {
+      shopModal.style.display = 'none';
+    }
+
+    // Close Modal when clicking outside the modal content
+    window.onclick = function(event) {
+      if (event.target == shopModal) {
+        shopModal.style.display = 'none';
+      }
+    }
   </script>
 </body>
 </html>
