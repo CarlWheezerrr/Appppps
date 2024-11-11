@@ -64,6 +64,16 @@
       --success-color: #16a085;
     }
 
+    /* Exclusive Theme (for Special Items) */
+    .theme-exclusive {
+      --primary-color: #ff69b4;
+      --secondary-color: #ffe4e1;
+      --background-color: #ffb6c1;
+      --accent-color: #8a2be2;
+      --error-color: #ff1493;
+      --success-color: #32cd32;
+    }
+
     /* Base Styles */
     body {
       font-family: var(--font-family);
@@ -71,6 +81,8 @@
       padding: 0;
       background-color: var(--background-color);
       transition: background-color 0.5s ease;
+      position: relative;
+      min-height: 100vh;
     }
     .container {
       max-width: 1000px;
@@ -196,6 +208,12 @@
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
     /* Responsive */
     @media (max-width: 600px) {
       .shop-items {
@@ -212,6 +230,7 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 20px;
+      position: relative;
     }
     .avatar-container img {
       width: 60px;
@@ -229,6 +248,9 @@
     /* Active Boosters */
     .boosters {
       margin-top: 30px;
+    }
+    .boosters h2 {
+      margin-bottom: 15px;
     }
     .booster-item {
       background-color: var(--background-color);
@@ -303,8 +325,8 @@
       background-color: var(--success-color);
       cursor: default;
     }
-    /* Shop Toggle Button */
-    .shop-toggle-button {
+    /* Toggle Buttons */
+    .toggle-button {
       position: fixed;
       bottom: 20px;
       right: 20px;
@@ -319,13 +341,75 @@
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
       z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .shop-toggle-button:hover {
+    /* Separate positioning for multiple toggle buttons */
+    .toggle-button.shop {
+      right: 90px; /* Position shop button slightly to the left */
+    }
+    .toggle-button.clicker {
+      right: 20px; /* Position clicker button at original position */
+    }
+    .toggle-button:hover {
       background-color: var(--accent-color);
       transform: translateY(-2px);
     }
-    .shop-toggle-button:active {
+    .toggle-button:active {
       transform: translateY(0);
+    }
+
+    /* Notification Styles */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      z-index: 1002;
+    }
+    .notification {
+      background-color: var(--success-color);
+      color: var(--secondary-color);
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: slideIn 0.5s forwards;
+    }
+    .notification.error {
+      background-color: var(--error-color);
+    }
+    .notification.info {
+      background-color: var(--accent-color);
+    }
+
+    /* Clicker Game Button Styles */
+    .clicker-game-button {
+      width: 150px;
+      height: 150px;
+      font-size: 24px;
+      border-radius: 50%;
+      background-color: #ff5722;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+    }
+    .clicker-game-button:hover {
+      background-color: #e64a19;
+    }
+    .clicker-game-button:active {
+      transform: scale(0.95);
+    }
+    .clicker-count {
+      font-size: 18px;
+      color: var(--primary-color);
     }
   </style>
 </head>
@@ -373,16 +457,32 @@
     </div>
   </div>
 
-  <!-- Shop Toggle Button -->
-  <button class="shop-toggle-button" id="openShop">🛒</button>
+  <!-- Clicker Game Modal -->
+  <div id="clickerModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeClicker">&times;</span>
+      <h2>Clicker Game</h2>
+      <button class="clicker-game-button" id="clickerButton">Click Me!</button>
+      <div class="clicker-count" id="clickerCount">Clicks: 0</div>
+    </div>
+  </div>
+
+  <!-- Shop and Clicker Game Toggle Buttons -->
+  <button class="toggle-button shop" id="openShop">🛒</button>
+  <button class="toggle-button clicker" id="openClicker">🎮</button>
+
+  <!-- Notification Container -->
+  <div class="notification-container" id="notificationContainer">
+    <!-- Notifications will appear here -->
+  </div>
 
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get, update, onValue, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getDatabase, ref, set, get, update, onValue, push, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
     // Firebase configuration
-    const firebaseConfig = {
+const firebaseConfig = {
       apiKey: "AIzaSyCnT2hx4dYFDdLCjlxdNoabBu68b7eSwvI",
       authDomain: "project-5c6c5.firebaseapp.com",
       projectId: "project-5c6c5",
@@ -399,6 +499,7 @@
 
     let currentUser = '';
     let boosterIntervals = {};
+    let clickCount = 0; // For Clicker Game
 
     const availableItems = [
       // Themes
@@ -603,12 +704,13 @@
       // Set user data in Firebase if not already set
       get(userRef).then(snapshot => {
         if (!snapshot.exists()) {
-          set(userRef, { balance: 100, items: [], equippedItems: {}, activeBoosters: {} }); // Initial balance, empty items, no active boosters
+          set(userRef, { balance: 100, items: [], equippedItems: {}, activeBoosters: {}, notifications: [], clicks: 0 }); // Initial balance, empty items, no active boosters
         }
         // Update UI with current balance and items
         updateBalanceText(username);
         loadPurchasedItems();
         loadShopItems();
+        loadNotifications();
       });
       displayStatus(`Username set to: ${username}`, 'success');
     }
@@ -664,6 +766,15 @@
 
           // Load Active Boosters
           loadActiveBoosters(data.activeBoosters);
+
+          // Update Clicker Count
+          if (data.clicks) {
+            clickCount = data.clicks;
+            document.getElementById('clickerCount').innerText = `Clicks: ${clickCount}`;
+          }
+
+          // Listen for new notifications
+          handleIncomingNotifications(data.notifications || {});
         }
       });
     }
@@ -679,6 +790,11 @@
       let transferAmount = parseInt(transferAmountInput);
       const recipient = document.getElementById('recipient').value.trim();
 
+      if (!recipient) {
+        displayStatus('Please enter a recipient username.', 'error');
+        return;
+      }
+
       // Apply Strength Booster if active
       const userRef = ref(database, 'users/' + currentUser);
       get(userRef).then(snapshot => {
@@ -690,8 +806,8 @@
           }
 
           // Check if input fields are valid
-          if (!recipient || !transferAmount || transferAmount <= 0) {
-            displayStatus('Please fill in all fields with valid data.', 'error');
+          if (!transferAmount || transferAmount <= 0) {
+            displayStatus('Please enter a valid transfer amount.', 'error');
             return;
           }
 
@@ -724,6 +840,8 @@
                     // Deduct from sender's balance and update it
                     const newSenderBalance = senderBalance - transferAmount;
                     update(senderRef, { balance: newSenderBalance }).then(() => {
+                      // Send notification to recipient
+                      sendNotification(recipient, `You have received $${transferAmount} from ${currentUser}.`);
                       // Show success message
                       displayStatus(`Successfully transferred $${transferAmount} to ${recipient}.`, 'success');
                     }).catch(error => {
@@ -736,7 +854,9 @@
                   });
                 } else {
                   // If recipient does not exist, create them with the transferred amount
-                  set(recipientRef, { balance: transferAmount, items: [], equippedItems: {}, activeBoosters: {} }).then(() => {
+                  set(recipientRef, { balance: transferAmount, items: [], equippedItems: {}, activeBoosters: {}, notifications: [], clicks: 0 }).then(() => {
+                    // Send notification to recipient
+                    sendNotification(recipient, `You have received $${transferAmount} from ${currentUser}.`);
                     // Deduct from sender's balance and update it
                     const newSenderBalance = senderBalance - transferAmount;
                     update(senderRef, { balance: newSenderBalance }).then(() => {
@@ -778,6 +898,66 @@
       setTimeout(() => {
         statusMessage.innerText = '';
         statusMessage.classList.remove('error', 'success');
+      }, 5000);
+    }
+
+    // Notification Functions
+
+    // Send Notification
+    function sendNotification(recipient, message) {
+      const notificationsRef = ref(database, `users/${recipient}/notifications`);
+      const newNotificationRef = push(notificationsRef);
+      set(newNotificationRef, {
+        message: message,
+        timestamp: Date.now(),
+        read: false
+      }).catch(error => {
+        console.error('Error sending notification:', error);
+      });
+    }
+
+    // Load Notifications
+    function loadNotifications() {
+      if (!currentUser) return;
+
+      const notificationsRef = ref(database, `users/${currentUser}/notifications`);
+      onValue(notificationsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const notifications = snapshot.val();
+          handleIncomingNotifications(notifications);
+        }
+      });
+    }
+
+    // Handle Incoming Notifications
+    function handleIncomingNotifications(notifications) {
+      // Iterate over each notification with its key
+      for (const notificationKey in notifications) {
+        const notification = notifications[notificationKey];
+        if (!notification.read) {
+          showNotification(notification.message, 'info');
+          // Mark as read
+          update(ref(database, `users/${currentUser}/notifications/${notificationKey}`), { read: true });
+        }
+      }
+    }
+
+    // Show Notification in UI
+    function showNotification(message, type) {
+      const notificationContainer = document.getElementById('notificationContainer');
+      const notificationDiv = document.createElement('div');
+      notificationDiv.classList.add('notification');
+      if (type === 'error') {
+        notificationDiv.classList.add('error');
+      } else if (type === 'info') {
+        notificationDiv.classList.add('info');
+      }
+      notificationDiv.innerText = message;
+      notificationContainer.appendChild(notificationDiv);
+
+      // Remove notification after 5 seconds
+      setTimeout(() => {
+        notificationDiv.remove();
       }, 5000);
     }
 
@@ -1107,6 +1287,8 @@
       if (itemId === 'special-token') {
         // Unlock exclusive Theme or feature
         // For demonstration, let's add a new exclusive theme
+
+        // Define exclusive theme styles (Already defined in CSS)
         const exclusiveTheme = {
           id: 'theme-exclusive',
           name: 'Exclusive Theme',
@@ -1115,20 +1297,6 @@
           className: 'theme-exclusive',
           img: 'https://via.placeholder.com/100/ff69b4/ffffff?text=Exclusive+Theme'
         };
-
-        // Define exclusive theme styles
-        const style = document.createElement('style');
-        style.innerHTML = `
-          .theme-exclusive {
-            --primary-color: #ff69b4;
-            --secondary-color: #ffe4e1;
-            --background-color: #ffb6c1;
-            --accent-color: #8a2be2;
-            --error-color: #ff1493;
-            --success-color: #32cd32;
-          }
-        `;
-        document.head.appendChild(style);
 
         // Add the exclusive theme to availableItems if not already present
         if (!availableItems.find(i => i.id === 'theme-exclusive')) {
@@ -1186,7 +1354,7 @@
                 if (snapshot.exists()) {
                   const currentBalance = snapshot.val();
                   const newBalance = currentBalance + 5;
-                  update(ref(database, `users/${currentUser}`), { balance: newBalance });
+                  update(ref(database, `users/${currentUser}/`), { balance: newBalance });
                 }
               }).catch(error => console.error(error));
             }, 30000); // 30 seconds
@@ -1249,7 +1417,7 @@
       }
     });
 
-    // Modal Functionality
+    // Modal Functionality for Shop
     const shopModal = document.getElementById('shopModal');
     const openShopButton = document.getElementById('openShop');
     const closeShopButton = document.getElementById('closeShop');
@@ -1264,12 +1432,56 @@
       shopModal.style.display = 'none';
     }
 
-    // Close Modal when clicking outside the modal content
+    // Modal Functionality for Clicker Game
+    const clickerModal = document.getElementById('clickerModal');
+    const openClickerButton = document.getElementById('openClicker');
+    const closeClickerButton = document.getElementById('closeClicker');
+
+    // Open Clicker Game Modal
+    openClickerButton.onclick = () => {
+      clickerModal.style.display = 'flex';
+    }
+
+    // Close Clicker Game Modal
+    closeClickerButton.onclick = () => {
+      clickerModal.style.display = 'none';
+    }
+
+    // Close Modals when clicking outside the modal content
     window.onclick = function(event) {
       if (event.target == shopModal) {
         shopModal.style.display = 'none';
       }
+      if (event.target == clickerModal) {
+        clickerModal.style.display = 'none';
+      }
     }
+
+    // Clicker Game Functionality
+    const clickerButton = document.getElementById('clickerButton');
+    const clickerCountDisplay = document.getElementById('clickerCount');
+
+    clickerButton.addEventListener('click', () => {
+      if (!currentUser) {
+        displayStatus('Please set your username first.', 'error');
+        return;
+      }
+
+      clickCount += 1;
+      clickerCountDisplay.innerText = `Clicks: ${clickCount}`;
+
+      // Update balance and click count in Firebase
+      const userRef = ref(database, `users/${currentUser}`);
+      update(userRef, {
+        balance: (parseInt(document.getElementById('balanceDisplay').innerText.replace('Balance: $', '')) || 0) + 1,
+        clicks: clickCount
+      }).then(() => {
+        displayStatus('You earned $1!', 'success');
+      }).catch(error => {
+        console.error(error);
+        displayStatus('An error occurred while updating your balance.', 'error');
+      });
+    });
   </script>
 </body>
 </html>
